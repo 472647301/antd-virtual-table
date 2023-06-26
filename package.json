@@ -1,6 +1,6 @@
 {
   "name": "@byron-react/antd-virtual-table",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "antd-virtual-table",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -16,7 +16,19 @@
     "build:deps": "father prebundle",
     "prepublishOnly": "father doctor && npm run build"
   },
-  "keywords": [],
+  "homepage": "https://github.com/472647301/antd-virtual-table",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/472647301/antd-virtual-table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/472647301/antd-virtual-table/issues"
+  },
+  "keywords": [
+    "react",
+    "antd",
+    "virtual table"
+  ],
   "authors": [
     "byron.zhuwenbo@gmail.com"
   ],
