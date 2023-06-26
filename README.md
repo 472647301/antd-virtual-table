@@ -6,7 +6,7 @@
 ## Install
 
 ```bash
-$ yarn install
+$ yarn install @byron-react/antd-virtual-table
 ```
 
 ```bash
