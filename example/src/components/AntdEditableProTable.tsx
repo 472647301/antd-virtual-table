@@ -1,8 +1,6 @@
-import { VirtualProTable } from "./src";
+import { VirtualEditableProTable } from "./src";
 import { createColumns, tableSize } from "../utils";
-import { useEffect, useState, useMemo } from "react";
-import { useAntdResizableHeader } from "@minko-fe/use-antd-resizable-header";
-import "@minko-fe/use-antd-resizable-header/index.css";
+import { useEffect, useState } from "react";
 
 const columns = createColumns();
 
@@ -13,37 +11,29 @@ const data = Array.from({ length: 100000 }, (_, key) => {
   );
 });
 
-const AntdResizableTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize(50, 170));
+const AntdEditableProTable: React.FC = () => {
+  const [windowSize, setWindowSize] = useState(tableSize(50, 210));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     function updateSize() {
-      setWindowSize(tableSize(50, 170));
+      setWindowSize(tableSize(50, 210));
     }
     window.addEventListener("resize", updateSize, { passive: true });
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  const { components, resizableColumns } = useAntdResizableHeader({
-    columns: useMemo(() => columns, []),
-    // 保存拖拽宽度至本地localStorage
-    columnsState: {
-      persistenceKey: "localKey",
-      persistenceType: "localStorage",
-    },
-  });
-
   return (
-    <VirtualProTable
-      components={components}
-      columns={resizableColumns}
-      dataSource={data}
+    <VirtualEditableProTable
+      columns={columns.map((c) => {
+        return { ...c, shouldCellUpdate: () => false };
+      })}
+      value={data}
+      rowKey={"id"}
+      search={{}}
       scroll={{ x: windowSize[0], y: windowSize[1] }}
-      columnsState={{
-        persistenceKey: "localKey",
-        persistenceType: "localStorage",
-      }}
+      editable={{ type: "multiple", editableKeys: selectedRowKeys }}
+      recordCreatorProps={{ record: () => ({}) }}
       rowSelection={{
         selectedRowKeys,
         onChange(selectedRowKeys, selectedRows, info) {
@@ -52,11 +42,11 @@ const AntdResizableTable: React.FC = () => {
         },
         fixed: "left",
       }}
+      onValuesChange={(values, record) => console.log(values, record)}
       pagination={false}
       bordered
-      rowKey={"id"}
     />
   );
 };
 
-export default AntdResizableTable;
+export default AntdEditableProTable;

@@ -1,35 +1,30 @@
-import { VirtualTable } from "@byron-react/antd-virtual-table";
-import { VirtualTableProps } from "@byron-react/antd-virtual-table";
-import ProTable, { ColumnsState } from "@ant-design/pro-table";
+import { VirtualProTable } from "./src";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
-import { useDebounce } from "ahooks";
-
-interface ItemT {}
 
 const columns = createColumns();
 
 const data = Array.from({ length: 100000 }, (_, key) => {
-  return Object.fromEntries(columns.map((e) => [e.dataIndex, key]));
+  return Object.assign(
+    { id: key },
+    Object.fromEntries(columns.map((e) => [e.dataIndex, key]))
+  );
 });
 
 const AntdProTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize(170));
+  const [windowSize, setWindowSize] = useState(tableSize(50, 170));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [columnsState, setColumnsState] =
-    useState<Record<string, ColumnsState>>();
-  const debouncedValue = useDebounce(columnsState, { wait: 500 });
 
   useEffect(() => {
     function updateSize() {
-      setWindowSize(tableSize(170));
+      setWindowSize(tableSize(50, 170));
     }
     window.addEventListener("resize", updateSize, { passive: true });
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   return (
-    <ProTable
+    <VirtualProTable
       columns={columns}
       dataSource={data}
       scroll={{ x: windowSize[0], y: windowSize[1] }}
@@ -42,33 +37,13 @@ const AntdProTable: React.FC = () => {
         fixed: "left",
       }}
       columnsState={{
-        value: debouncedValue,
         onChange(map) {
-          setColumnsState(map);
+          console.log(map);
         },
       }}
       pagination={false}
       bordered
-      tableRender={(props, _, domList) => {
-        let newColumns = props.columns?.filter((e) => {
-          if (debouncedValue) {
-            return debouncedValue[e.dataIndex as unknown as string].show;
-          }
-          return true;
-        });
-        if (!newColumns?.length) {
-          newColumns = props.columns;
-        }
-        return (
-          <>
-            {domList.toolbar}
-            <VirtualTable
-              {...(props as unknown as VirtualTableProps<ItemT>)}
-              columns={newColumns as any}
-            />
-          </>
-        );
-      }}
+      rowKey={"id"}
     />
   );
 };

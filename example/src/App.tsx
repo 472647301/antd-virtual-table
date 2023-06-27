@@ -1,36 +1,72 @@
 import React from "react";
-import { Tabs } from "antd";
-import type { TabsProps } from "antd";
+import { Menu } from "antd";
 
-import "./components/src/style/index.css";
+import "@byron-react/antd-virtual-table/es/style/index.css";
 import AntdTable from "./components/AntdTable";
 import SelectedTable from "./components/SelectedTable";
 import AntdProTable from "./components/AntdProTable";
 import AntdResizableTable from "./components/AntdResizableTable";
+import AntdEditableProTable from "./components/AntdEditableProTable";
+import { useRoutes, Navigate, useNavigate } from "react-router-dom";
+import { HashRouter, useLocation } from "react-router-dom";
 
-const items: TabsProps["items"] = [
+const routes = [
   {
-    key: "1",
-    label: `Antd Table`,
-    children: <AntdTable />,
+    path: "",
+    element: <Navigate to={"AntdTable"} replace />,
   },
   {
-    key: "2",
-    label: `Antd Selected Table`,
-    children: <SelectedTable />,
+    path: "AntdTable",
+    element: <AntdTable />,
   },
   {
-    key: "3",
-    label: `Antd Pro Table`,
-    children: <AntdProTable />,
+    path: "SelectedTable",
+    element: <SelectedTable />,
   },
   {
-    key: "4",
-    label: `Antd Resizable Table`,
-    children: <AntdResizableTable />,
+    path: "AntdProTable",
+    element: <AntdProTable />,
+  },
+  {
+    path: "AntdResizableTable",
+    element: <AntdResizableTable />,
+  },
+  {
+    path: "AntdEditableProTable",
+    element: <AntdEditableProTable />,
   },
 ];
 
-const App: React.FC = () => <Tabs defaultActiveKey="1" items={items} />;
+const items = routes
+  .filter((e) => !!e.path)
+  .map((e) => ({ key: e.path, label: e.path }));
+
+const Router: React.FC = () => {
+  return useRoutes(routes);
+};
+
+const Header = () => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  return (
+    <Menu
+      items={items}
+      mode="horizontal"
+      onClick={(e) => navigate(e.key)}
+      selectedKeys={[pathname.replaceAll("/", "")]}
+    />
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <>
+      <HashRouter>
+        <Header />
+        <Router />
+      </HashRouter>
+    </>
+  );
+};
 
 export default App;

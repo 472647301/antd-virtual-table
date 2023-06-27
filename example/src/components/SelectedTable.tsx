@@ -1,30 +1,30 @@
-import { VirtualTable } from "@byron-react/antd-virtual-table";
-import type { VirtualTableProps } from "@byron-react/antd-virtual-table";
+import { VirtualProTable } from "./src";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
 
-interface ItemT {}
-
-const columns: VirtualTableProps<ItemT>["columns"] = createColumns();
+const columns = createColumns();
 
 const data = Array.from({ length: 100000 }, (_, key) => {
-  return Object.fromEntries(columns.map((e) => [e.dataIndex, key]));
+  return Object.assign(
+    { id: key },
+    Object.fromEntries(columns.map((e) => [e.dataIndex, key]))
+  );
 });
 
 const SelectedTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize());
+  const [windowSize, setWindowSize] = useState(tableSize(50, 170));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     function updateSize() {
-      setWindowSize(tableSize());
+      setWindowSize(tableSize(50, 170));
     }
     window.addEventListener("resize", updateSize, { passive: true });
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   return (
-    <VirtualTable
+    <VirtualProTable
       columns={columns}
       dataSource={data}
       scroll={{ x: windowSize[0], y: windowSize[1] }}
@@ -38,6 +38,7 @@ const SelectedTable: React.FC = () => {
       }}
       pagination={false}
       bordered
+      rowKey={"id"}
     />
   );
 };
