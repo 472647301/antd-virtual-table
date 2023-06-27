@@ -3,7 +3,6 @@ import { Menu } from "antd";
 
 import "@byron-react/antd-virtual-table/es/style/index.css";
 import AntdTable from "./components/AntdTable";
-import SelectedTable from "./components/SelectedTable";
 import AntdProTable from "./components/AntdProTable";
 import AntdResizableTable from "./components/AntdResizableTable";
 import AntdEditableProTable from "./components/AntdEditableProTable";
@@ -18,10 +17,6 @@ const routes = [
   {
     path: "AntdTable",
     element: <AntdTable />,
-  },
-  {
-    path: "SelectedTable",
-    element: <SelectedTable />,
   },
   {
     path: "AntdProTable",

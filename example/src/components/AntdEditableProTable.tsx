@@ -1,8 +1,14 @@
-import { VirtualEditableProTable } from "./src";
+import { VirtualEditableProTable } from "@byron-react/antd-virtual-table";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
+import { VirtualEditableProTableProps } from "@byron-react/antd-virtual-table";
 
-const columns = createColumns();
+interface ItemT {
+  id: number;
+}
+
+const columns: VirtualEditableProTableProps<ItemT, {}, "text">["columns"] =
+  createColumns();
 
 const data = Array.from({ length: 100000 }, (_, key) => {
   return Object.assign(
@@ -12,27 +18,53 @@ const data = Array.from({ length: 100000 }, (_, key) => {
 });
 
 const AntdEditableProTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize(50, 210));
+  const [windowSize, setWindowSize] = useState(tableSize(50, 270));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [dataSource, setDataSource] = useState(data);
 
   useEffect(() => {
     function updateSize() {
-      setWindowSize(tableSize(50, 210));
+      setWindowSize(tableSize(50, 270));
     }
     window.addEventListener("resize", updateSize, { passive: true });
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const option: VirtualEditableProTableProps<ItemT, {}, "text">["columns"] = [
+    {
+      title: "操作",
+      valueType: "option",
+      width: 200,
+      fixed: "right",
+      render: (_text, record, _, action) => [
+        <a
+          key="editable"
+          onClick={() => {
+            action?.startEditable?.(record.id);
+          }}
+        >
+          编辑
+        </a>,
+        <a
+          key="delete"
+          onClick={() => {
+            setDataSource(dataSource.filter((item) => item.id !== record.id));
+          }}
+        >
+          删除
+        </a>,
+      ],
+    },
+  ];
+
   return (
     <VirtualEditableProTable
-      columns={columns.map((c) => {
-        return { ...c, shouldCellUpdate: () => false };
-      })}
-      value={data}
+      columns={columns.concat(option)}
+      value={dataSource}
       rowKey={"id"}
       search={{}}
       scroll={{ x: windowSize[0], y: windowSize[1] }}
-      editable={{ type: "multiple", editableKeys: selectedRowKeys }}
+      editable={{ type: "multiple" }}
       recordCreatorProps={{ record: () => ({}) }}
       rowSelection={{
         selectedRowKeys,

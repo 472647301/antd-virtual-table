@@ -38,8 +38,8 @@ export const VirtualEditableProTable = <
     T,
     U,
     ValueType
-  >["tableViewRender"] = (props) => {
-    let newColumns = props.columns?.filter((e, i) => {
+  >["tableViewRender"] = (tableProps) => {
+    let newColumns = tableProps.columns?.filter((e, i) => {
       const columnKey = genColumnKey(e.key, i);
       if (columnsConfig) {
         return columnsConfig[columnKey]?.show;
@@ -48,7 +48,7 @@ export const VirtualEditableProTable = <
     });
     if (!newColumns?.length) {
       // 至少保留一列
-      newColumns = props.columns?.slice(0, 3);
+      newColumns = tableProps.columns?.slice(0, 3);
     }
     if (columnsConfig && newColumns) {
       newColumns?.sort(columnSort(columnsConfig));
@@ -56,6 +56,7 @@ export const VirtualEditableProTable = <
     return (
       <VirtualTable
         {...(props as unknown as VirtualTableProps<T>)}
+        {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as any}
       />
     );

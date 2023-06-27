@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ConfigProvider, Empty, Table, TableProps } from "antd";
 import { TableColumnType as AntdTableColumnType, Checkbox } from "antd";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { GridChildComponentProps } from "./Cell";
 import { MemonableVirtualTableCell } from "./Cell";
 import { TableComponents } from "rc-table/lib/interface";
 import { useSelections, useThrottleEffect } from "ahooks";
+import { ProTableProps } from "@ant-design/pro-table";
 
 export interface InfoRef {
   scrollLeft: number;
@@ -76,6 +77,8 @@ export interface VirtualTableProps<RecordType extends Record<any, any>>
   rowHeight?: number | ((record: Readonly<RecordType>) => number);
   rerenderFixedColumnOnHorizontalScroll?: boolean;
   onScroll?: OnScrollCallback;
+  columnsState?: ProTableProps<RecordType, {}>;
+  tableViewRender?: () => React.ReactNode;
 }
 
 export const VirtualTable = <RecordType extends Record<any, any>>(
@@ -83,9 +86,9 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
 ) => {
   const {
     ref,
-    dataSource,
+    dataSource = [],
     className,
-    columns,
+    columns: originalColumns,
     rowHeight = 54,
     scroll,
     gridRef,
@@ -97,9 +100,12 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     showHeader,
     rerenderFixedColumnOnHorizontalScroll,
     rowSelection,
+    columnsState,
+    tableViewRender,
     ...tableProps
   } = props;
 
+  const isProTabel = !!tableViewRender;
   const tableRef = useRef<HTMLElement | null>(null);
   const internalGridRef = useRef<Grid<RecordType> | null>(null);
   const [connectObject] = useState<InfoRef>(() => {
@@ -109,92 +115,104 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
           // @ts-ignore
           return internalGridRef.current?.state.scrollLeft;
         }
-
         return 0;
       },
-
       set scrollLeft(value: number) {
         if (internalGridRef.current) {
           // @ts-ignore
           const currentScrollLeft = internalGridRef.current.state.scrollLeft;
-
-          if (currentScrollLeft == value) {
+          if (currentScrollLeft === value) {
             return;
           }
-
           internalGridRef.current.scrollTo({ scrollLeft: value });
         }
       },
     };
   });
 
-  let rowKey = "key";
-  if (typeof props.rowKey === "string") {
-    rowKey = props.rowKey;
-  }
+  const [rowKey] = useMemo(() => {
+    let rowKey = "key";
+    if (typeof props.rowKey === "string") {
+      rowKey = props.rowKey;
+    }
+    return [rowKey];
+  }, [props.rowKey]);
 
-  const {
-    selected,
-    allSelected,
-    isSelected,
-    toggle,
-    toggleAll,
-    partiallySelected,
-  } = useSelections(
-    dataSource?.map((e) => e[rowKey]) || [],
-    rowSelection?.selectedRowKeys || []
-  );
+  const [items] = useMemo(() => {
+    let items = dataSource.map((e) => e[rowKey]);
+    items = items.filter((e) => e !== undefined && e !== null);
+    return [items];
+  }, [dataSource, rowKey]);
 
-  const selectionTitle = useMemo(
-    () => (
-      <Checkbox
-        onClick={toggleAll}
-        checked={allSelected}
-        indeterminate={partiallySelected}
-      />
-    ),
-    [toggleAll, allSelected, partiallySelected]
-  );
+  const { selected, isSelected, toggle, allSelected, toggleAll, unSelectAll } =
+    useSelections(items, rowSelection?.defaultSelectedRowKeys || []);
 
-  if (rowSelection && rowKey) {
-    columns.unshift({
-      title: selectionTitle,
-      width: rowSelection.columnWidth ? +rowSelection.columnWidth : 60,
-      fixed: rowSelection.fixed,
-      dataIndex: rowKey,
-      render: (val, record) => (
-        <Checkbox
-          {...(record && rowSelection.getCheckboxProps
-            ? rowSelection.getCheckboxProps(record)
-            : {})}
-          checked={isSelected(val)}
-          onClick={() => toggle(val)}
-        />
-      ),
-    });
-  }
+  const selectionColumn: () => ColumnType<RecordType> = useCallback(() => {
+    const onCheckedAll = () => {
+      toggleAll();
+      const newArr = allSelected ? [] : items;
+      rowSelection?.onChange?.(
+        newArr,
+        dataSource.filter((e) => newArr.includes(e[rowKey])),
+        { type: "all" }
+      );
+    };
 
-  useThrottleEffect(
-    () => {
-      if (!rowSelection?.onChange || !dataSource?.length) {
-        return;
+    const onChecked = (val: React.Key) => {
+      toggle(val);
+      let newArr = [...selected];
+      if (isSelected(val)) {
+        newArr.push(val);
+      } else {
+        newArr = newArr.filter((id) => id !== val);
       }
-      rowSelection.onChange(
-        selected,
-        dataSource.filter((e) => selected.includes(e[rowKey])),
+      rowSelection?.onChange?.(
+        newArr,
+        dataSource.filter((e) => newArr.includes(e[rowKey])),
         { type: "none" }
       );
-    },
-    [selected, dataSource],
-    { wait: 100 }
-  );
+    };
+    return {
+      dataIndex: rowKey,
+      fixed: rowSelection?.fixed,
+      title: <Checkbox onClick={onCheckedAll} checked={allSelected} />,
+      width: rowSelection?.columnWidth ? +rowSelection.columnWidth : 60,
+      render: (val: React.Key, record?: RecordType) => (
+        <Checkbox
+          {...rowSelection?.getCheckboxProps?.(record!)}
+          onClick={() => onChecked(val)}
+          checked={isSelected(val)}
+        />
+      ),
+    };
+  }, [
+    rowSelection,
+    selected,
+    toggle,
+    allSelected,
+    toggleAll,
+    isSelected,
+    dataSource,
+    items,
+    rowKey,
+  ]);
+
+  const [newColumns] = useMemo(() => {
+    const newColumns = [...originalColumns];
+    if (
+      (rowSelection && rowKey && isProTabel) ||
+      (!isProTabel &&
+        rowKey &&
+        rowSelection?.selectedRowKeys &&
+        rowSelection.onChange)
+    ) {
+      newColumns.unshift(selectionColumn());
+    }
+    return [newColumns];
+  }, [originalColumns, rowSelection, selectionColumn, isProTabel, rowKey]);
 
   const fixStickyHeaderOffset = useCallback(
     (tableWrap?: HTMLElement | null) => {
-      // Данная функция нужна для поддержки overlap свойства колонки
-      // Исправляем смещение для sticky колонок
-      // Так же исправим баг связанный с таблицей
-
       if (showHeader === false || components?.header) {
         return;
       }
@@ -283,7 +301,18 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     [scroll.scrollToFirstRowOnChange, connectObject, fixStickyHeaderOffset]
   );
 
-  useThrottleEffect(reset, [columns], { wait: 500 });
+  useThrottleEffect(reset, [columnsState], { wait: 300 });
+
+  useEffect(() => {
+    if (
+      isProTabel &&
+      selected.length &&
+      !rowSelection?.selectedRowKeys?.length
+    ) {
+      unSelectAll();
+      rowSelection?.onChange?.([], [], { type: "all" });
+    }
+  }, [rowSelection, selected, isProTabel, unSelectAll]);
 
   const handleChange = useCallback<NonNullable<typeof onChange>>(
     (pagination, filters, sorter, extra) => {
@@ -304,10 +333,10 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     useMemo(() => {
       let blockBuffer = 0;
 
-      const normalizeColumns: typeof columns = [];
+      const normalizeColumns: typeof newColumns = [];
       const normalizeIndexes: number[] = [];
 
-      columns.forEach((column, index) => {
+      newColumns.forEach((column, index) => {
         if (blockBuffer > 1) {
           blockBuffer--;
           return;
@@ -335,7 +364,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
       };
 
       return [normalizeColumns, normalizeIndexes, getColumn, cellRender];
-    }, [columns]);
+    }, [newColumns]);
 
   const rowHeightGetterByRecord = useMemo(
     () => (isFunction(rowHeight) ? rowHeight : () => rowHeight),
@@ -351,7 +380,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     const emptyNode = typeof emptyText === "function" ? emptyText() : emptyText;
 
     return <div className="virtual-grid-empty">{emptyNode}</div>;
-  }, [locale?.emptyText, renderEmpty]);
+  }, [locale, renderEmpty]);
 
   const bodyRender = useCallback(
     (rawData: readonly RecordType[], info: Info) => {
@@ -380,10 +409,10 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
 
           for (let overlapIndex = 1; overlapIndex < overlap; overlapIndex++) {
             lastBlockedIndex++;
-            blockedWidth += columns[lastBlockedIndex].width;
+            blockedWidth += newColumns[lastBlockedIndex].width;
           }
 
-          return lastBlockedIndex === columns.length - 1
+          return lastBlockedIndex === newColumns.length - 1
             ? blockedWidth - scrollbarSize
             : blockedWidth;
         }
@@ -447,7 +476,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
       rerenderFixedColumnOnHorizontalScroll,
       normalizeIndexes,
       normalizeColumns,
-      columns,
+      newColumns,
       scroll.x,
       scroll.y,
       getColumn,
@@ -464,7 +493,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     scroll.x,
     scroll.y,
     scroll.scrollToFirstRowOnChange,
-    columns,
+    newColumns,
     showHeader,
     components?.header,
   ]);
@@ -479,7 +508,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
       locale={locale}
       showHeader={showHeader}
       className={classNames("virtual-table", className)}
-      columns={columns}
+      columns={newColumns}
       dataSource={dataSource}
       scroll={scroll}
       components={{

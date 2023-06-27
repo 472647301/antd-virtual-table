@@ -1,4 +1,4 @@
-import { VirtualTable } from "./src";
+import { VirtualTable } from "@byron-react/antd-virtual-table";
 import type { VirtualTableProps } from "@byron-react/antd-virtual-table";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ const data = Array.from({ length: 100000 }, (_, key) => {
 
 const AntdTable: React.FC = () => {
   const [windowSize, setWindowSize] = useState(tableSize(0, 20));
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     function updateSize() {
@@ -32,7 +33,12 @@ const AntdTable: React.FC = () => {
       scroll={{ x: windowSize[0], y: windowSize[1] }}
       pagination={false}
       style={{ marginTop: 20 }}
-      rowSelection={{}}
+      rowSelection={{
+        selectedRowKeys,
+        onChange(selectedRowKeys) {
+          setSelectedRowKeys(selectedRowKeys);
+        },
+      }}
       bordered
       rowKey={"id"}
     />

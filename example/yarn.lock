@@ -1309,10 +1309,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@byron-react/antd-virtual-table@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@byron-react/antd-virtual-table/-/antd-virtual-table-0.0.4.tgz#a472ccb967e04bdeaa2136e70904793e9c63dc0b"
-  integrity sha512-Sz4h+e/HUtqGwOm8cCxnmCsSQd2rh0Jhg/wm2I+WG7+dpSBD0Ughe2dVp1gAOSv0y+OsX0TKje0SJ3sRaD36tg==
+"@byron-react/antd-virtual-table@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@byron-react/antd-virtual-table/-/antd-virtual-table-0.0.5.tgz#293c086a027d21829f735f79b6dcb28add65167c"
+  integrity sha512-kkRMUds+laf0dbpocR0NwyOhiDMlapNVKySyiwQv8NW66rgkCDIuV/OtC6oftgpCHWcr4qfC751tLU9P+kzQyw==
   dependencies:
     "@babel/runtime" "^7.22.5"
     ahooks "^3.7.8"

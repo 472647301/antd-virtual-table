@@ -1,4 +1,4 @@
-import { VirtualProTable } from "./src";
+import { VirtualProTable } from "@byron-react/antd-virtual-table";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
 
@@ -12,12 +12,12 @@ const data = Array.from({ length: 100000 }, (_, key) => {
 });
 
 const AntdProTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize(50, 170));
+  const [windowSize, setWindowSize] = useState(tableSize(50, 220));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     function updateSize() {
-      setWindowSize(tableSize(50, 170));
+      setWindowSize(tableSize(50, 220));
     }
     window.addEventListener("resize", updateSize, { passive: true });
     return () => window.removeEventListener("resize", updateSize);

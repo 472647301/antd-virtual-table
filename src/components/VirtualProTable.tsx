@@ -1,7 +1,5 @@
-import ProTable, { ProTableProps, ColumnsState } from "@ant-design/pro-table";
+import ProTable, { ProTableProps } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
-import { useDebounce } from "ahooks";
-import { useState } from "react";
 import { VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
 
@@ -18,38 +16,31 @@ export const VirtualProTable = <
 >(
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
-  const [values, setValues] = useState<Record<string, ColumnsState>>();
-  const columnsConfig = useDebounce(values, { wait: 500 });
-
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
-    value: columnsConfig,
-    onChange(map) {
-      setValues(map);
-      props.columnsState?.onChange?.(map);
-    },
   };
 
+  console.log("--VirtualProTable--");
+
   const tableViewRender: ProTableProps<T, U, ValueType>["tableViewRender"] = (
-    props
+    tableProps
   ) => {
-    let newColumns = props.columns?.filter((e, i) => {
+    console.log("--tableViewRender--");
+    const _props = tableProps as ProTableProps<T, U, ValueType>;
+    let newColumns = _props.columns?.filter((e, i) => {
       const columnKey = genColumnKey(e.key, i);
-      if (columnsConfig) {
-        return columnsConfig[columnKey]?.show;
+      if (_props.columnsState?.value) {
+        return _props.columnsState?.value[columnKey]?.show;
       }
       return true;
     });
-    if (!newColumns?.length) {
-      // 至少保留一列
-      newColumns = props.columns?.slice(0, 3);
-    }
-    if (columnsConfig && newColumns) {
-      newColumns?.sort(columnSort(columnsConfig));
+    if (_props.columnsState?.value && newColumns) {
+      newColumns?.sort(columnSort(_props.columnsState?.value));
     }
     return (
       <VirtualTable
-        {...(props as unknown as VirtualTableProps<T>)}
+        {...(props as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
+        {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as any}
       />
     );
