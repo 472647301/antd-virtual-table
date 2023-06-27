@@ -14,6 +14,10 @@ $ npm run dev
 $ npm run build
 ```
 
+## Screenshot
+
+<img src="https://github.com/472647301/antd-virtual-table/blob/main/screenshot/demo.png?raw=true" width="1038">
+
 ## Options
 
 TODO
