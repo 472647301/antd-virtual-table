@@ -9,7 +9,7 @@ import { sumColumnWidths, sumRowsHeights } from "../utils";
 import { GridChildComponentProps } from "./Cell";
 import { MemonableVirtualTableCell } from "./Cell";
 import { TableComponents } from "rc-table/lib/interface";
-import { useSelections, useThrottleEffect } from "ahooks";
+import { useSelections } from "ahooks";
 import { ProTableProps } from "@ant-design/pro-table";
 
 export interface InfoRef {
@@ -301,7 +301,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     [scroll.scrollToFirstRowOnChange, connectObject, fixStickyHeaderOffset]
   );
 
-  useThrottleEffect(reset, [columnsState], { wait: 300 });
+  useEffect(reset, [columnsState]);
 
   useEffect(() => {
     if (
