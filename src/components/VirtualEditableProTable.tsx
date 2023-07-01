@@ -65,8 +65,15 @@ export const VirtualEditableProTable = <
   return (
     <EditableProTable
       {...props}
-      tableViewRender={tableViewRender}
-      options={{ ...props.options, density: false }}
+      tableViewRender={
+        props.dataSource?.length && props.dataSource.length >= 30
+          ? tableViewRender
+          : void 0
+      }
+      options={{
+        ...props.options,
+        density: !(props.dataSource?.length && props.dataSource.length >= 30),
+      }}
       columnsState={columnsState}
     />
   );
