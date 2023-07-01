@@ -20,12 +20,9 @@ export const VirtualProTable = <
     ...props.columnsState,
   };
 
-  console.log("--VirtualProTable--");
-
   const tableViewRender: ProTableProps<T, U, ValueType>["tableViewRender"] = (
     tableProps
   ) => {
-    console.log("--tableViewRender--");
     const _props = tableProps as ProTableProps<T, U, ValueType>;
     let newColumns = _props.columns?.filter((e, i) => {
       const columnKey = genColumnKey(e.key, i);

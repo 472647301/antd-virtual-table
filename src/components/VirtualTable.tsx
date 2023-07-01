@@ -399,6 +399,8 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
         rawData.length - 1
       );
 
+      const scrollY = Math.min(scroll.y, rawData.length * 54 + 10);
+
       const columnWidthGetter = (index: number): number => {
         const column = normalizeColumns[index];
         const { width, overlap } = column;
@@ -417,7 +419,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
             : blockedWidth;
         }
 
-        return totalHeight >= scroll.y && index === normalizeColumns.length - 1
+        return totalHeight >= scrollY && index === normalizeColumns.length - 1
           ? width - scrollbarSize
           : width;
       };
@@ -455,7 +457,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
             estimatedColumnWidth={totalWidth / normalizeColumns.length}
             estimatedRowHeight={totalHeight / rawData.length}
             width={scroll.x}
-            height={scroll.y}
+            height={scrollY}
             columnCount={normalizeColumns.length}
             rowCount={rawData.length}
             rowHeight={rowHeightGetter}
