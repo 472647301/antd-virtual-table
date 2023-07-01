@@ -51,7 +51,10 @@ export const VirtualProTable = <
           ? tableViewRender
           : void 0
       }
-      options={{ ...props.options, density: false }}
+      options={{
+        ...props.options,
+        density: !(props.dataSource?.length && props.dataSource.length >= 30),
+      }}
       columnsState={columnsState}
     />
   );
