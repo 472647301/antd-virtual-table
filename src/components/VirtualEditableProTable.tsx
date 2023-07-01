@@ -1,6 +1,5 @@
-import { EditableProTable, ColumnsState } from "@ant-design/pro-table";
+import { EditableProTable } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
-import { useDebounce } from "ahooks";
 import { useState } from "react";
 import { VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
@@ -22,16 +21,17 @@ export const VirtualEditableProTable = <
 >(
   props: VirtualEditableProTableProps<T, U, ValueType>
 ) => {
-  const [values, setValues] = useState<Record<string, ColumnsState>>();
-  const columnsConfig = useDebounce(values, { wait: 500 });
-
+  const [isVirtual, setIsVirtual] = useState(false);
   const columnsState: EditableProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
-    value: columnsConfig,
-    onChange(map) {
-      setValues(map);
-      props.columnsState?.onChange?.(map);
-    },
+  };
+
+  const onLoad = (dataSource: T[]) => {
+    const _virtual = dataSource.length > 20;
+    if (_virtual !== isVirtual) {
+      setIsVirtual(_virtual);
+    }
+    props.onLoad?.(dataSource);
   };
 
   const tableViewRender: EditableProTableProps<
@@ -39,19 +39,16 @@ export const VirtualEditableProTable = <
     U,
     ValueType
   >["tableViewRender"] = (tableProps) => {
-    let newColumns = tableProps.columns?.filter((e, i) => {
+    const _props = tableProps as EditableProTableProps<T, U, ValueType>;
+    let newColumns = _props.columns?.filter((e, i) => {
       const columnKey = genColumnKey(e.key, i);
-      if (columnsConfig) {
-        return columnsConfig[columnKey]?.show;
+      if (_props.columnsState?.value) {
+        return _props.columnsState?.value[columnKey]?.show;
       }
       return true;
     });
-    if (!newColumns?.length) {
-      // 至少保留一列
-      newColumns = tableProps.columns?.slice(0, 3);
-    }
-    if (columnsConfig && newColumns) {
-      newColumns?.sort(columnSort(columnsConfig));
+    if (_props.columnsState?.value && newColumns) {
+      newColumns?.sort(columnSort(_props.columnsState?.value));
     }
     return (
       <VirtualTable
@@ -65,14 +62,11 @@ export const VirtualEditableProTable = <
   return (
     <EditableProTable
       {...props}
-      tableViewRender={
-        props.dataSource?.length && props.dataSource.length >= 30
-          ? tableViewRender
-          : void 0
-      }
+      onLoad={onLoad}
+      tableViewRender={isVirtual ? tableViewRender : void 0}
       options={{
         ...props.options,
-        density: !(props.dataSource?.length && props.dataSource.length >= 30),
+        density: !isVirtual,
       }}
       columnsState={columnsState}
     />
