@@ -399,7 +399,10 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
         rawData.length - 1
       );
 
-      const scrollY = Math.min(scroll.y, rawData.length * 54 + 10);
+      const scrollY = Math.min(
+        scroll.y,
+        rawData.length ? rawData.length * 54 : 80
+      );
 
       const columnWidthGetter = (index: number): number => {
         const column = normalizeColumns[index];
