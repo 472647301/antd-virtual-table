@@ -2,6 +2,7 @@ import ProTable, { ProTableProps } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
 import { VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
+import { useState } from "react";
 
 export interface VirtualProTableProps<T, U, ValueType>
   extends Omit<
@@ -16,8 +17,17 @@ export const VirtualProTable = <
 >(
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
+  const [isVirtual, setIsVirtual] = useState(false);
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
+  };
+
+  const onLoad = (dataSource: T[]) => {
+    const _virtual = dataSource.length > 20;
+    if (_virtual !== isVirtual) {
+      setIsVirtual(_virtual);
+    }
+    props.onLoad?.(dataSource);
   };
 
   const tableViewRender: ProTableProps<T, U, ValueType>["tableViewRender"] = (
@@ -46,14 +56,11 @@ export const VirtualProTable = <
   return (
     <ProTable
       {...props}
-      tableViewRender={
-        props.dataSource?.length && props.dataSource.length >= 30
-          ? tableViewRender
-          : void 0
-      }
+      onLoad={onLoad}
+      tableViewRender={isVirtual ? tableViewRender : void 0}
       options={{
         ...props.options,
-        density: !(props.dataSource?.length && props.dataSource.length >= 30),
+        density: !isVirtual,
       }}
       columnsState={columnsState}
     />
