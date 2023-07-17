@@ -89,7 +89,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     dataSource = [],
     className,
     columns: originalColumns,
-    rowHeight = 54,
+    rowHeight = 32,
     scroll,
     gridRef,
     outerGridRef,
