@@ -2,7 +2,7 @@ import ProTable, { ProTableProps } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
 import { ScrollConfig, VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export interface VirtualProTableProps<T, U, ValueType>
   extends Omit<
@@ -20,7 +20,7 @@ export const VirtualProTable = <
 >(
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
-  const id = `${Date.now()}`;
+  const id = useMemo(() => `${Date.now()}`, []);
   const [size, setSize] = useState<ScrollConfig>(props.scroll as ScrollConfig);
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
@@ -76,12 +76,16 @@ export const VirtualProTable = <
     ) {
       sizeY = 50;
     }
+    const scroll = {
+      x: _props.scroll?.x as number,
+      y: (_props.scroll?.y as number) - sizeY,
+    };
     return (
       <VirtualTable
         {...(props as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={{ ...size, y: size.y - sizeY }}
+        scroll={scroll}
       />
     );
   };
@@ -92,6 +96,7 @@ export const VirtualProTable = <
       tableViewRender={tableViewRender}
       options={{ ...props.options, density: false }}
       columnsState={columnsState}
+      scroll={size}
       id={id}
     />
   );

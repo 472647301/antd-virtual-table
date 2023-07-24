@@ -1,6 +1,6 @@
 import { EditableProTable } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollConfig, VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
 import type { EditableProTableProps } from "@ant-design/pro-table/es/components/EditableTable";
@@ -13,7 +13,8 @@ export interface VirtualEditableProTableProps<
     EditableProTableProps<T, U, ValueType>,
     "tableRender" | "tableViewRender"
   > {
-  offsetBottom?: number;
+  offsetY?: number;
+  offsetX?: number;
 }
 
 export const VirtualEditableProTable = <
@@ -23,7 +24,7 @@ export const VirtualEditableProTable = <
 >(
   props: VirtualEditableProTableProps<T, U, ValueType>
 ) => {
-  const id = `${Date.now()}`;
+  const id = useMemo(() => `${Date.now()}`, []);
   const [size, setSize] = useState<ScrollConfig>(props.scroll as ScrollConfig);
   const columnsState: EditableProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
@@ -31,9 +32,9 @@ export const VirtualEditableProTable = <
 
   const onResize = () => {
     let toolbarHeight = 0;
-    const offsetBottom = props.offsetBottom || 0;
+    const offsetBottom = props.offsetY || 0;
     const dom = document.getElementById(id);
-    console.log("onResize", dom?.getBoundingClientRect());
+    console.log("onResize", id, dom?.getBoundingClientRect());
     if (!dom) return;
     const toolbarElm = dom.getElementsByClassName(
       ".ant-pro-table-list-toolbar"
@@ -80,13 +81,16 @@ export const VirtualEditableProTable = <
     ) {
       sizeY = 50;
     }
-    console.log("-size--", size);
+    console.log("-size--", _props.scroll);
     return (
       <VirtualTable
         {...(props as unknown as VirtualTableProps<T>)}
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={{ x: size.x + 10, y: size.y - sizeY }}
+        scroll={{
+          x: _props.scroll!.x as number,
+          y: (_props.scroll!.y as number) - sizeY,
+        }}
       />
     );
   };
@@ -97,6 +101,7 @@ export const VirtualEditableProTable = <
       tableViewRender={tableViewRender}
       options={{ ...props.options, density: false }}
       columnsState={columnsState}
+      scroll={size}
       id={id}
     />
   );
