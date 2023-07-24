@@ -29,7 +29,7 @@ export const VirtualEditableProTable = <
     ...props.columnsState,
   };
 
-  useEffect(() => {
+  const onResize = () => {
     let toolbarHeight = 0;
     const offsetBottom = props.offsetBottom || 0;
     const dom = document.getElementById(id);
@@ -41,10 +41,20 @@ export const VirtualEditableProTable = <
       toolbarHeight = toolbarElm[0].getBoundingClientRect().height;
     }
     const rect = dom.getBoundingClientRect();
-    const paginationHeight = props.pagination ? 68 : 0; // 分页
+    const paginationHeight = props.pagination ? 48 : 0; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
-    setSize({ x: rect.width, y: y - offsetBottom });
-  }, []);
+    setSize({ x: rect.width, y: y - offsetBottom }); // 在减去头部
+  };
+
+  useEffect(() => {
+    onResize();
+    window.addEventListener("resize", onResize);
+    document.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("resize", onResize);
+    };
+  }, [props.rowSelection]);
 
   const tableViewRender: EditableProTableProps<
     T,
