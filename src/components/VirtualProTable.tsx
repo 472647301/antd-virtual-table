@@ -9,7 +9,8 @@ export interface VirtualProTableProps<T, U, ValueType>
     ProTableProps<T, U, ValueType>,
     "tableRender" | "tableViewRender"
   > {
-  offsetBottom?: number;
+  offsetY?: number;
+  offsetX?: number;
 }
 
 export const VirtualProTable = <
@@ -27,7 +28,8 @@ export const VirtualProTable = <
 
   const onResize = () => {
     let toolbarHeight = 0;
-    const offsetBottom = props.offsetBottom || 0;
+    const offsetX = props.offsetX || 0;
+    const offsetY = props.offsetY || 0;
     const dom = document.getElementById(id);
     console.log("onResize", dom?.getBoundingClientRect());
     if (!dom) return;
@@ -40,7 +42,7 @@ export const VirtualProTable = <
     const rect = dom.getBoundingClientRect();
     const paginationHeight = props.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
-    setSize({ x: rect.width + 12, y: y - offsetBottom }); // 在减去头部
+    setSize({ x: rect.width + offsetX, y: y - offsetY }); // 在减去头部
   };
 
   useEffect(() => {
