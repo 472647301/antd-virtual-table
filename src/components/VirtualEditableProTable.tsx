@@ -33,6 +33,7 @@ export const VirtualEditableProTable = <
     let toolbarHeight = 0;
     const offsetBottom = props.offsetBottom || 0;
     const dom = document.getElementById(id);
+    console.log("onResize", dom?.getBoundingClientRect());
     if (!dom) return;
     const toolbarElm = dom.getElementsByClassName(
       ".ant-pro-table-list-toolbar"
@@ -41,7 +42,7 @@ export const VirtualEditableProTable = <
       toolbarHeight = toolbarElm[0].getBoundingClientRect().height;
     }
     const rect = dom.getBoundingClientRect();
-    const paginationHeight = props.pagination ? 48 : 0; // 分页
+    const paginationHeight = props.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
     setSize({ x: rect.width, y: y - offsetBottom }); // 在减去头部
   };
