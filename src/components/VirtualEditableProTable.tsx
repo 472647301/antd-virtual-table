@@ -55,7 +55,7 @@ export const VirtualEditableProTable = <
       window.removeEventListener("resize", onResize);
       document.removeEventListener("resize", onResize);
     };
-  }, [props.rowSelection]);
+  }, []);
 
   const tableViewRender: EditableProTableProps<
     T,
@@ -73,12 +73,19 @@ export const VirtualEditableProTable = <
     if (_props.columnsState?.value && newColumns) {
       newColumns?.sort(columnSort(_props.columnsState?.value));
     }
+    let sizeY = 0;
+    if (
+      _props.rowSelection !== false &&
+      _props.rowSelection?.selectedRowKeys?.length
+    ) {
+      sizeY = 50;
+    }
     return (
       <VirtualTable
         {...(props as unknown as VirtualTableProps<T>)}
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={size}
+        scroll={{ ...size, y: size.y - sizeY }}
       />
     );
   };
