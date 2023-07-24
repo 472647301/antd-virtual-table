@@ -3,7 +3,6 @@ import React, { memo } from "react";
 import { GridChildComponentProps as OriginalGridChildComponentProps } from "react-window";
 import { classNames, getDataValue } from "../utils";
 import type { ColumnType } from "./VirtualTable";
-import { Tooltip } from "antd";
 
 export const columnRowClassName = "virtial-grid-item";
 
@@ -61,11 +60,7 @@ export function VirtualTableCell<RecordType extends Record<any, any> = any>(
       }}
       className={classNames(columnRowClassName, cellProps?.className)}
     >
-      {column.ellipsis && value ? (
-        <Tooltip title={value}>{content}</Tooltip>
-      ) : (
-        content
-      )}
+      {content}
     </div>
   );
 }

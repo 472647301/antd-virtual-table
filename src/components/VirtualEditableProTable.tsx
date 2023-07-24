@@ -24,7 +24,7 @@ export const VirtualEditableProTable = <
   props: VirtualEditableProTableProps<T, U, ValueType>
 ) => {
   const id = `${Date.now()}`;
-  const [size, setSize] = useState<ScrollConfig>();
+  const [size, setSize] = useState<ScrollConfig>({ x: 100, y: 100 });
   const columnsState: EditableProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
   };
@@ -77,7 +77,7 @@ export const VirtualEditableProTable = <
         {...(props as unknown as VirtualTableProps<T>)}
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={{ x: 0, y: 0, ...size }}
+        scroll={size}
       />
     );
   };

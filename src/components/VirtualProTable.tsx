@@ -20,7 +20,7 @@ export const VirtualProTable = <
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
   const id = `${Date.now()}`;
-  const [size, setSize] = useState<ScrollConfig>();
+  const [size, setSize] = useState<ScrollConfig>({ x: 100, y: 100 });
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
   };
@@ -71,7 +71,7 @@ export const VirtualProTable = <
         {...(props as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={{ x: 0, y: 0, ...size }}
+        scroll={size}
       />
     );
   };
