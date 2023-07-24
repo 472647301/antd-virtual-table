@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/pro-table": "^3.8.2",
-    "@byron-react/antd-virtual-table": "^0.0.5",
+    "@byron-react/antd-virtual-table": "^1.1.2",
     "@minko-fe/use-antd-resizable-header": "^2.8.13",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",

@@ -40,7 +40,7 @@ export const VirtualProTable = <
     const rect = dom.getBoundingClientRect();
     const paginationHeight = props.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
-    setSize({ x: rect.width + 12, y: y - offsetBottom }); // 在减去头部
+    setSize({ x: rect.width, y: y - offsetBottom }); // 在减去头部
   };
 
   useEffect(() => {

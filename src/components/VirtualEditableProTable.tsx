@@ -24,7 +24,7 @@ export const VirtualEditableProTable = <
   props: VirtualEditableProTableProps<T, U, ValueType>
 ) => {
   const id = `${Date.now()}`;
-  const [size, setSize] = useState<ScrollConfig>({ x: 100, y: 100 });
+  const [size, setSize] = useState<ScrollConfig>(props.scroll as ScrollConfig);
   const columnsState: EditableProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
   };
@@ -44,7 +44,7 @@ export const VirtualEditableProTable = <
     const rect = dom.getBoundingClientRect();
     const paginationHeight = props.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
-    setSize({ x: rect.width, y: y - offsetBottom }); // 在减去头部
+    setSize({ x: rect.width + 12, y: y - offsetBottom }); // 在减去头部
   };
 
   useEffect(() => {

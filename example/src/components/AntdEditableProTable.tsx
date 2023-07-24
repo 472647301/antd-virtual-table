@@ -1,7 +1,7 @@
-import { VirtualEditableProTable } from "@byron-react/antd-virtual-table";
+import { VirtualEditableProTable } from "./src";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
-import { VirtualEditableProTableProps } from "@byron-react/antd-virtual-table";
+import { VirtualEditableProTableProps } from "./src";
 
 interface ItemT {
   id: number;
@@ -18,17 +18,8 @@ const data = Array.from({ length: 100000 }, (_, key) => {
 });
 
 const AntdEditableProTable: React.FC = () => {
-  const [windowSize, setWindowSize] = useState(tableSize(50, 270));
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [dataSource, setDataSource] = useState(data);
-
-  useEffect(() => {
-    function updateSize() {
-      setWindowSize(tableSize(50, 270));
-    }
-    window.addEventListener("resize", updateSize, { passive: true });
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
 
   const option: VirtualEditableProTableProps<ItemT, {}, "text">["columns"] = [
     {
@@ -63,7 +54,7 @@ const AntdEditableProTable: React.FC = () => {
       value={dataSource}
       rowKey={"id"}
       search={{}}
-      scroll={{ x: windowSize[0], y: windowSize[1] }}
+      scroll={{ x: window.innerWidth - 100, y: window.innerHeight - 50 }}
       editable={{ type: "multiple" }}
       recordCreatorProps={{ record: () => ({}) }}
       rowSelection={{

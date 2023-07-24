@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu } from "antd";
 
-import "@byron-react/antd-virtual-table/es/style/index.css";
+import "./components/src/style/index.css";
 import AntdTable from "./components/AntdTable";
 import AntdProTable from "./components/AntdProTable";
 import AntdResizableTable from "./components/AntdResizableTable";

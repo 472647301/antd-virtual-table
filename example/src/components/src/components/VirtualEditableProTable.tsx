@@ -1,27 +1,31 @@
-import ProTable, { ProTableProps } from "@ant-design/pro-table";
+import { EditableProTable } from "@ant-design/pro-table";
 import type { ParamsType } from "@ant-design/pro-provider";
+import { useEffect, useState } from "react";
 import { ScrollConfig, VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
-import { useEffect, useState } from "react";
+import type { EditableProTableProps } from "@ant-design/pro-table/es/components/EditableTable";
 
-export interface VirtualProTableProps<T, U, ValueType>
-  extends Omit<
-    ProTableProps<T, U, ValueType>,
+export interface VirtualEditableProTableProps<
+  T,
+  U extends ParamsType,
+  ValueType
+> extends Omit<
+    EditableProTableProps<T, U, ValueType>,
     "tableRender" | "tableViewRender"
   > {
   offsetBottom?: number;
 }
 
-export const VirtualProTable = <
+export const VirtualEditableProTable = <
   T extends Record<string, any>,
   U extends ParamsType = ParamsType,
   ValueType = "text"
 >(
-  props: VirtualProTableProps<T, U, ValueType>
+  props: VirtualEditableProTableProps<T, U, ValueType>
 ) => {
   const id = `${Date.now()}`;
   const [size, setSize] = useState<ScrollConfig>(props.scroll as ScrollConfig);
-  const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
+  const columnsState: EditableProTableProps<T, U, ValueType>["columnsState"] = {
     ...props.columnsState,
   };
 
@@ -40,7 +44,7 @@ export const VirtualProTable = <
     const rect = dom.getBoundingClientRect();
     const paginationHeight = props.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
-    setSize({ x: rect.width + 12, y: y - offsetBottom }); // 在减去头部
+    setSize({ x: rect.width, y: y - offsetBottom }); // 在减去头部
   };
 
   useEffect(() => {
@@ -53,10 +57,12 @@ export const VirtualProTable = <
     };
   }, []);
 
-  const tableViewRender: ProTableProps<T, U, ValueType>["tableViewRender"] = (
-    tableProps
-  ) => {
-    const _props = tableProps as ProTableProps<T, U, ValueType>;
+  const tableViewRender: EditableProTableProps<
+    T,
+    U,
+    ValueType
+  >["tableViewRender"] = (tableProps) => {
+    const _props = tableProps as EditableProTableProps<T, U, ValueType>;
     let newColumns = _props.columns?.filter((e, i) => {
       const columnKey = genColumnKey(e.key, i);
       if (_props.columnsState?.value) {
@@ -74,18 +80,19 @@ export const VirtualProTable = <
     ) {
       sizeY = 50;
     }
+    console.log("-size--", size);
     return (
       <VirtualTable
-        {...(props as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
+        {...(props as unknown as VirtualTableProps<T>)}
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
-        scroll={{ ...size, y: size.y - sizeY }}
+        scroll={{ x: size.x + 10, y: size.y - sizeY }}
       />
     );
   };
 
   return (
-    <ProTable
+    <EditableProTable
       {...props}
       tableViewRender={tableViewRender}
       options={{ ...props.options, density: false }}

@@ -1,5 +1,5 @@
-import { VirtualTable } from "@byron-react/antd-virtual-table";
-import type { VirtualTableProps } from "@byron-react/antd-virtual-table";
+import { VirtualTable } from "./src";
+import type { VirtualTableProps } from "./src";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState } from "react";
 

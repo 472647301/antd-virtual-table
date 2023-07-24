@@ -1,4 +1,4 @@
-import { VirtualProTable } from "@byron-react/antd-virtual-table";
+import { VirtualProTable } from "./src";
 import { createColumns, tableSize } from "../utils";
 import { useEffect, useState, useMemo } from "react";
 import { useAntdResizableHeader } from "@minko-fe/use-antd-resizable-header";
