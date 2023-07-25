@@ -3,6 +3,8 @@ import type { ParamsType } from "@ant-design/pro-provider";
 import { ScrollConfig, VirtualTable, VirtualTableProps } from "./VirtualTable";
 import { columnSort, genColumnKey } from "../utils";
 import { useEffect, useMemo, useState } from "react";
+import { EditableProTable } from "@ant-design/pro-table";
+import type { EditableProTableProps } from "@ant-design/pro-table/es/components/EditableTable";
 
 export interface VirtualProTableProps<T, U, ValueType>
   extends Omit<
@@ -11,6 +13,7 @@ export interface VirtualProTableProps<T, U, ValueType>
   > {
   offsetY?: number;
   offsetX?: number;
+  autoHeight?: boolean;
 }
 
 export const VirtualProTable = <
@@ -21,17 +24,16 @@ export const VirtualProTable = <
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
   const id = useMemo(() => `${Date.now()}`, []);
-  const [size, setSize] = useState<ScrollConfig>(props.scroll as ScrollConfig);
+  const { offsetX = 0, offsetY = 0, autoHeight, ...rest } = props;
+  const [size, setSize] = useState<ScrollConfig>(rest.scroll as ScrollConfig);
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
-    ...props.columnsState,
+    ...rest.columnsState,
   };
 
   const onResize = () => {
     let toolbarHeight = 0;
-    const offsetX = props.offsetX || 0;
-    const offsetY = props.offsetY || 0;
     const dom = document.getElementById(id);
-    console.log("onResize", dom?.getBoundingClientRect());
+    // console.log("onResize", dom?.getBoundingClientRect());
     if (!dom) return;
     const toolbarElm = dom.getElementsByClassName(
       ".ant-pro-table-list-toolbar"
@@ -40,12 +42,13 @@ export const VirtualProTable = <
       toolbarHeight = toolbarElm[0].getBoundingClientRect().height;
     }
     const rect = dom.getBoundingClientRect();
-    const paginationHeight = props.pagination ? 78 : 28; // 分页
+    const paginationHeight = rest.pagination ? 78 : 28; // 分页
     const y = window.innerHeight - rect.top - paginationHeight - toolbarHeight;
     setSize({ x: rect.width + offsetX, y: y - offsetY }); // 在减去头部
   };
 
   useEffect(() => {
+    if (autoHeight === false) return;
     onResize();
     window.addEventListener("resize", onResize);
     document.addEventListener("resize", onResize);
@@ -58,8 +61,12 @@ export const VirtualProTable = <
   const tableViewRender: ProTableProps<T, U, ValueType>["tableViewRender"] = (
     tableProps
   ) => {
+    let _width = 0;
     const _props = tableProps as ProTableProps<T, U, ValueType>;
     let newColumns = _props.columns?.filter((e, i) => {
+      if (typeof e.width === "number") {
+        _width += e.width;
+      }
       const columnKey = genColumnKey(e.key, i);
       if (_props.columnsState?.value) {
         return _props.columnsState?.value[columnKey]?.show;
@@ -69,6 +76,7 @@ export const VirtualProTable = <
     if (_props.columnsState?.value && newColumns) {
       newColumns?.sort(columnSort(_props.columnsState?.value));
     }
+
     let sizeY = 0;
     if (
       _props.rowSelection !== false &&
@@ -80,9 +88,15 @@ export const VirtualProTable = <
       x: _props.scroll?.x as number,
       y: (_props.scroll?.y as number) - sizeY,
     };
+    if (_width <= scroll.x && newColumns?.length) {
+      newColumns = newColumns.map((col) => {
+        col.width = Math.ceil(scroll.x / newColumns!.length);
+        return col;
+      });
+    }
     return (
       <VirtualTable
-        {...(props as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
+        {...(rest as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
         {...(tableProps as unknown as VirtualTableProps<T>)}
         columns={newColumns as VirtualTableProps<T>["columns"]}
         scroll={scroll}
@@ -90,11 +104,24 @@ export const VirtualProTable = <
     );
   };
 
+  if (rest.editable) {
+    return (
+      <EditableProTable
+        {...(rest as unknown as EditableProTableProps<T, {}>)}
+        tableViewRender={tableViewRender}
+        options={{ ...props.options, density: false }}
+        columnsState={columnsState}
+        scroll={size}
+        id={id}
+      />
+    );
+  }
+
   return (
     <ProTable
-      {...props}
+      {...rest}
       tableViewRender={tableViewRender}
-      options={{ ...props.options, density: false }}
+      options={{ ...rest.options, density: false }}
       columnsState={columnsState}
       scroll={size}
       id={id}
