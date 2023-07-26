@@ -6,11 +6,22 @@ import { useEffect, useMemo, useState } from "react";
 import { EditableProTable } from "@ant-design/pro-table";
 import type { EditableProTableProps } from "@ant-design/pro-table/es/components/EditableTable";
 
-export interface VirtualProTableProps<T, U, ValueType>
-  extends Omit<
-    ProTableProps<T, U, ValueType>,
-    "tableRender" | "tableViewRender"
-  > {
+type VProps<T extends Record<string, any>, U, ValueType> = Omit<
+  VirtualTableProps<T>,
+  | "components"
+  | "scroll"
+  | "columns"
+  | "columnsState"
+  | "onScroll"
+  | "tableViewRender"
+> &
+  Omit<ProTableProps<T, U, ValueType>, "tableRender" | "tableViewRender">;
+
+export interface VirtualProTableProps<
+  T extends Record<string, any>,
+  U,
+  ValueType
+> extends VProps<T, U, ValueType> {
   offsetY?: number;
   offsetX?: number;
   autoHeight?: boolean;
@@ -24,7 +35,13 @@ export const VirtualProTable = <
   props: VirtualProTableProps<T, U, ValueType>
 ) => {
   const id = useMemo(() => `${Date.now()}`, []);
-  const { offsetX = 0, offsetY = 0, autoHeight, ...rest } = props;
+  const {
+    offsetX = 0,
+    offsetY = 0,
+    autoHeight,
+    rowHeight = 32,
+    ...rest
+  } = props;
   const [size, setSize] = useState<ScrollConfig>(rest.scroll as ScrollConfig);
   const columnsState: ProTableProps<T, U, ValueType>["columnsState"] = {
     ...rest.columnsState,
@@ -93,6 +110,13 @@ export const VirtualProTable = <
         col.width = Math.ceil(scroll.x / newColumns!.length);
         return col;
       });
+    }
+    if (typeof rowHeight === "number" && _props.dataSource?.length) {
+      const len = _props.dataSource.length;
+      const total = len * rowHeight + len;
+      if (scroll.y > total) {
+        scroll.y = total;
+      }
     }
     return (
       <VirtualTable

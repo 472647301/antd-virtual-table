@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { MutableRefObject, useEffect } from "react";
 import { ConfigProvider, Empty, Table, TableProps } from "antd";
 import { TableColumnType as AntdTableColumnType, Checkbox } from "antd";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -70,8 +70,8 @@ export type VirtualTableComponents<RecordType> = Omit<
 export interface VirtualTableProps<RecordType extends Record<any, any>>
   extends Omit<TableProps<RecordType>, "columns" | "scroll" | "components"> {
   components?: VirtualTableComponents<RecordType>;
-  gridRef?: React.Ref<Grid<RecordType>>;
-  outerGridRef?: React.Ref<HTMLElement>;
+  gridRef: MutableRefObject<Grid<RecordType>>;
+  outerGridRef: MutableRefObject<HTMLElement>;
   scroll: ScrollConfig;
   columns: ColumnsType<RecordType>;
   rowHeight?: number | ((record: Readonly<RecordType>) => number);
@@ -79,6 +79,11 @@ export interface VirtualTableProps<RecordType extends Record<any, any>>
   onScroll?: OnScrollCallback;
   columnsState?: ProTableProps<RecordType, {}>;
   tableViewRender?: () => React.ReactNode;
+  /**
+   * 为了改善虚拟化列表的用户体验，react-window 允许通过 overscanCount 属性对项目过扫描。这样可以定义在可见“窗口”外部始终渲染的项目数
+   */
+  overscanRowCount?: number;
+  overscanColumnsCount?: number;
 }
 
 export const VirtualTable = <RecordType extends Record<any, any>>(
@@ -102,6 +107,8 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     rowSelection,
     columnsState,
     tableViewRender,
+    overscanRowCount = 20,
+    overscanColumnsCount = 5,
     ...tableProps
   } = props;
 
@@ -464,6 +471,8 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
             itemData={rawData}
             columnGetter={getColumn}
             onScroll={handleScroll}
+            overscanRowCount={overscanRowCount}
+            overscanColumnCount={overscanColumnsCount}
           >
             {cellRender as any}
           </Grid>
