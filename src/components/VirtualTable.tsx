@@ -70,8 +70,8 @@ export type VirtualTableComponents<RecordType> = Omit<
 export interface VirtualTableProps<RecordType extends Record<any, any>>
   extends Omit<TableProps<RecordType>, "columns" | "scroll" | "components"> {
   components?: VirtualTableComponents<RecordType>;
-  gridRef: MutableRefObject<Grid<RecordType>>;
-  outerGridRef: MutableRefObject<HTMLElement>;
+  gridRef?: MutableRefObject<Grid<RecordType> | undefined>;
+  outerGridRef?: MutableRefObject<HTMLElement | undefined>;
   scroll: ScrollConfig;
   columns: ColumnsType<RecordType>;
   rowHeight?: number | ((record: Readonly<RecordType>) => number);
@@ -453,6 +453,7 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
           {!hasData && emptyNode}
           <Grid<RecordType>
             useIsScrolling
+            // @ts-ignore
             ref={refSetter(gridRef, internalGridRef)}
             outerRef={refSetter(outerGridRef)}
             className="virtual-grid"
