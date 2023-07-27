@@ -5,6 +5,7 @@ import { columnSort, genColumnKey } from "../utils";
 import { useEffect, useMemo, useState } from "react";
 import { EditableProTable } from "@ant-design/pro-table";
 import type { EditableProTableProps } from "@ant-design/pro-table/es/components/EditableTable";
+import { Table } from "antd";
 
 type VProps<T extends Record<string, any>, U, ValueType> = Omit<
   VirtualTableProps<T>,
@@ -118,6 +119,16 @@ export const VirtualProTable = <
         scroll.y = total;
       }
     }
+    if (!newColumns?.length) {
+      return (
+        <Table
+          {...(rest as unknown as VirtualTableProps<T>)}
+          {...(tableProps as unknown as VirtualTableProps<T>)}
+          columns={newColumns as VirtualTableProps<T>["columns"]}
+          scroll={scroll}
+        />
+      );
+    }
     return (
       <VirtualTable
         {...(rest as unknown as VirtualTableProps<T>)} // 不给会丢失rowKey等
@@ -144,7 +155,7 @@ export const VirtualProTable = <
   return (
     <ProTable
       {...rest}
-      tableViewRender={tableViewRender}
+      tableViewRender={rest.columns?.length ? tableViewRender : void 0}
       options={{ ...rest.options, density: false }}
       columnsState={columnsState}
       scroll={size}

@@ -1,6 +1,6 @@
 {
   "name": "@byron-react/antd-virtual-table",
-  "version": "1.2.0",
+  "version": "1.2.4",
   "description": "antd-virtual-table",
   "main": "lib/index.js",
   "module": "es/index.js",

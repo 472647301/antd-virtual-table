@@ -308,7 +308,9 @@ export const VirtualTable = <RecordType extends Record<any, any>>(
     [scroll.scrollToFirstRowOnChange, connectObject, fixStickyHeaderOffset]
   );
 
-  useEffect(reset, [columnsState]);
+  useEffect(() => {
+    reset();
+  });
 
   useEffect(() => {
     if (
