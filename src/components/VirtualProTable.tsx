@@ -106,12 +106,6 @@ export const VirtualProTable = <
       x: _props.scroll?.x as number,
       y: (_props.scroll?.y as number) - sizeY,
     };
-    if (_width <= scroll.x && newColumns?.length) {
-      newColumns = newColumns.map((col) => {
-        col.width = Math.ceil(scroll.x / newColumns!.length);
-        return col;
-      });
-    }
     if (typeof rowHeight === "number" && _props.dataSource?.length) {
       const len = _props.dataSource.length;
       const total = len * rowHeight + len;
@@ -119,7 +113,7 @@ export const VirtualProTable = <
         scroll.y = total;
       }
     }
-    if (!newColumns?.length) {
+    if (_width <= scroll.x || !newColumns?.length) {
       return (
         <Table
           {...(rest as unknown as VirtualTableProps<T>)}
